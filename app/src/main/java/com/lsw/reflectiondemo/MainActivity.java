@@ -4,6 +4,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -27,6 +28,12 @@ public class MainActivity extends AppCompatActivity {
         getAllConstructors();
         getAllMethods();
         getAllFields();
+        getSpecificMethod();
+        getTwoParamsMethod();
+        testGetSetMethod();
+        testField();
+        testArray();
+        modifyArray();
     }
 
     private void getMethodNum() {
@@ -212,6 +219,194 @@ public class MainActivity extends AppCompatActivity {
             Log.i(TAG, "getAllFields:属性名称 "+dFields[i].getName());
             Log.i(TAG, "getAllFields:修饰符 "+Modifier.toString(dFields[i].getModifiers()));
             Log.i(TAG, "getAllFields:类型名称 "+r.getName());
+        }
+
+    }
+
+    private void getSpecificMethod(){
+        Class c = null;
+        try {
+            c = Class.forName("com.lsw.reflectiondemo.Person");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Method method = c.getMethod("sayChinese");
+            try {
+                method.invoke(c.newInstance());
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            }
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void getTwoParamsMethod(){
+        Class c = null;
+        try {
+            c = Class.forName("com.lsw.reflectiondemo.Person");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Method method = c.getMethod("sayHello",String.class,int.class);
+            String result;
+            try {
+                result = (String) method.invoke(c.newInstance(),"liushuwei",20);
+                Log.i(TAG, "getTwoParamsMethod: "+result);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            }
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void testGetSetMethod(){
+        Class c = null;
+        try {
+            c = Class.forName("com.lsw.reflectiondemo.Person");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Object object = c.newInstance();
+            setter(object,"age",20,int.class);
+            getter(object,"age");
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void getter(Object obj,String att){
+        try {
+            Method method = obj.getClass().getMethod("get"+initStr(att));
+            try {
+                Log.i(TAG, "getter: "+method.invoke(obj));
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void setter(Object obj,String att,Object value,Class type){
+        try {
+            Method method = obj.getClass().getMethod("set"+initStr(att),type);
+            try {
+                Log.i(TAG, "setter: "+method.invoke(obj,value));
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private String initStr(String old){
+        String str = old.substring(0,1).toUpperCase()+old.substring(1);
+        return str;
+    }
+
+    private void testField(){
+        Class c = null;
+        try {
+            c = Class.forName("com.lsw.reflectiondemo.Person");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Object object = c.newInstance();
+            try {
+                Field nameField = c.getDeclaredField("name");
+                Field ageField = c.getDeclaredField("age");
+                nameField.setAccessible(true);
+                ageField.setAccessible(true);
+                nameField.set(object,"liushuwei");
+                ageField.set(object,20);
+                Log.i(TAG, "testField: name = "+nameField.get(object)+";age = "+ageField.get(object));
+            } catch (NoSuchFieldException e) {
+                e.printStackTrace();
+            }
+
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void testArray(){
+
+        int[] temp = {1,2,3};
+
+        Class c = temp.getClass().getComponentType();
+
+        Log.i(TAG, "testArray: name = "+c.getName());
+        Log.i(TAG, "testArray: "+ Array.getLength(temp));
+        Log.i(TAG, "testArray: "+ Array.get(temp,0));
+        Array.set(temp,0,6);
+        Log.i(TAG, "testArray: "+Array.get(temp,0));
+    }
+
+
+    private void modifyArray(){
+
+        int[] temp = {1,2,3};
+        String[] t ={"lsw","lgh","lsy"};
+        print(temp);
+        String[] nt = (String[])incArray(t,8);
+        print(nt);
+    }
+
+
+    private Object incArray(Object obj,int len){
+
+        Class c = obj.getClass();
+        Class arr = c.getComponentType();
+        Object new0 = Array.newInstance(arr,len);
+        int co = Array.getLength(obj);
+        System.arraycopy(obj,0,new0,0,co);
+        return new0;
+
+    }
+
+    private void print(Object obj){
+
+        Class c = obj.getClass();
+        if(!c.isArray()){
+            return;
+        }
+
+        Class arr = c.getComponentType();
+        for(int i = 0;i<Array.getLength(obj);i++){
+            Log.i(TAG, "print: "+Array.get(obj,i));
         }
 
     }
