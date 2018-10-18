@@ -21,7 +21,7 @@ public class Person3 implements China {
         this.age = age;
     }
 
-    public Person3(String name, int age) {
+    private Person3(String name, int age) {
         this.name = name;
         this.age = age;
     }
@@ -51,4 +51,13 @@ public class Person3 implements China {
     public void setAge(int age) {
         this.age = age;
     }
+
+    private String doSomething(String d) {
+        return "name = " + name + ";age = " + age + ";d = " + d;
+    }
+
+    private static String work(){
+        return "static";
+    }
+
 }

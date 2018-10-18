@@ -21,11 +21,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         getMethodNum();
         getClassName();
+        getSuperClass();
+        getType();
+        getAllConstructors();
         createPerson();
         createPerson2();
         getClassInterface();
-        getSuperClass();
-        getAllConstructors();
         getAllMethods();
         getAllFields();
         getSpecificMethod();
@@ -34,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
         testField();
         testArray();
         modifyArray();
+        getPrivateMethod();
     }
 
     private void getMethodNum() {
@@ -57,6 +59,21 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "getClassName: " + c1.getName());
         Log.i(TAG, "getClassName: " + c2.getName());
         Log.i(TAG, "getClassName: " + c3.getName());
+    }
+
+    /**
+     * 基本类型都有TYPE属性
+     */
+    private void getType(){
+        Log.i(TAG, "Boolean.TYPE: " + Boolean.TYPE);
+        Log.i(TAG, "Byte.TYPE: " + Byte.TYPE);
+        Log.i(TAG, "Character.TYPE: " + Character.TYPE);
+        Log.i(TAG, "Short.TYPE: " + Short.TYPE);
+        Log.i(TAG, "Integer.TYPE: " + Integer.TYPE);
+        Log.i(TAG, "Long.TYPE: " + Long.TYPE);
+        Log.i(TAG, "Float.TYPE: " + Float.TYPE);
+        Log.i(TAG, "Double.TYPE: " + Double.TYPE);
+        Log.i(TAG, "Void.TYPE: " + Void.TYPE);
     }
 
     private void createPerson(){
@@ -144,19 +161,59 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+        //获取类的所有public构造方法
         Constructor[] cons = c.getConstructors();
-
+        Log.i(TAG, "getPublicConstructors:length = "+cons.length);
         for(int i = 0;i<cons.length;i++){
-
-            Log.i(TAG, "getAllConstructors: "+"权限："+ Modifier.toString(cons[i].getModifiers())+";名称："+cons[i].getName());
+            Log.i(TAG, "getPublicConstructors: "+"权限："+ Modifier.toString(cons[i].getModifiers())+";名称："+cons[i].getName());
 
             Class[] p = cons[i].getParameterTypes();
+
+            for(int j = 0;j<p.length;j++){
+                Log.i(TAG, "getPublicConstructors:参数 "+p[j].getName());
+            }
+        }
+
+        //获取类的所有构造方法
+        Constructor[] allCons = c.getDeclaredConstructors();
+        Log.i(TAG, "getAllConstructors:length = "+allCons.length);
+        for(int i = 0;i<allCons.length;i++){
+            Log.i(TAG, "getAllConstructors: "+"权限："+ Modifier.toString(allCons[i].getModifiers())+";名称："+allCons[i].getName());
+
+            Class[] p = allCons[i].getParameterTypes();
 
             for(int j = 0;j<p.length;j++){
                 Log.i(TAG, "getAllConstructors:参数 "+p[j].getName());
             }
         }
 
+        //int参数构造方法
+        try {
+            Class[] p1 = {int.class};
+            Constructor constructor1 = c.getDeclaredConstructor(p1);
+            printParam(constructor1);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+
+        //int参数构造方法
+        try {
+            Class[] p2 = {String.class,int.class};
+            Constructor constructor2 = c.getDeclaredConstructor(p2);
+            printParam(constructor2);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void printParam(Constructor c){
+
+        Class[] p = c.getParameterTypes();
+
+        for(int j = 0;j<p.length;j++){
+            Log.i(TAG, "printParam:参数 "+p[j].getName());
+        }
     }
 
     private void getAllMethods(){
@@ -411,5 +468,68 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void getPrivateMethod(){
+        Class c = null;
+        Constructor constructor = null;
+        Person3 person3 = null;
+        try {
+            c = Class.forName("com.lsw.reflectiondemo.Person3");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        Class[] p3 = {String.class};
+        try {
+            constructor = c.getDeclaredConstructor(p3);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+
+
+        try {
+            person3 = (Person3)(constructor.newInstance("wanger"));
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+
+        Method method;
+        String result = null;
+
+        try {
+            Class[] p4 = {String.class};
+            method = c.getDeclaredMethod("doSomething", p4);
+            method.setAccessible(true);
+            try {
+                result = (String)(method.invoke(person3,"test"));
+                Log.i(TAG, "getPrivateMethod: "+result);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+
+        //private static 方法的调用
+        try {
+            Method method1 = c.getDeclaredMethod("work");
+            method1.setAccessible(true);
+            try {
+                Log.i(TAG, "getPrivateMethod: "+(String)method1.invoke(null));
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+
+    }
 
 }
