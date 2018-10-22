@@ -40,6 +40,13 @@ public class RefInvoke {
         return null;
     }
 
+    /**
+     * @param className 类名
+     * @param method_name 方法名
+     * @param pareTyples 参数类型class
+     * @param pareVaules 对应类型的参数值
+     * @return
+     */
     public static Object invokeStaticMethod(String className, String method_name, Class[] pareTyples, Object[] pareVaules) {
         try {
             Class obj_class = Class.forName(className);
